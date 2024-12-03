@@ -1,0 +1,283 @@
+{% load static %}
+{% load humanize %}
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Pedido de Venta</title>
+    <style>
+        @page {
+            /* size: 215.9mm 279.4mm; */
+            margin: 0.7cm 0.7cm 0.7cm 0.7cm;
+        }
+
+        table {
+            width: 100%;
+            border: 1px solid #999;
+            text-align: left;
+            border-collapse: collapse;
+            margin: 0 0 1em 0;
+            caption-side: top;
+        }
+
+        caption,
+        td,
+        th {
+            padding: 0.3em;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #999;
+            width: 25%;
+        }
+
+        caption {
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        .fila {
+            display: flex;
+            /* Activa flexbox */
+            flex-direction: row;
+            /* Asegura que estén en fila horizontal */
+            justify-content: space-between;
+            /* Espaciado opcional entre divs */
+            gap: 10px;
+            /* Espaciado entre divs */
+        }
+
+        .elemento {
+            background-color: lightblue;
+            /* Estilo para identificar los divs */
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ffffff;
+            margin-top: 0cm;
+        }
+
+        .elemento-info {
+            background-color: lightblue;
+            /* Estilo para identificar los divs */
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ffffff;
+            justify-content: space-between;
+            margin-top: 0cm;
+        }
+
+        .line {
+            position: fixed;
+            /* Fija el elemento en la pantalla */
+            bottom: 0;
+            /* Lo posiciona al final de la página */
+            left: 0;
+            /* Asegura que empiece desde el borde izquierdo */
+            width: 100%;
+            /* Extiende la línea a lo ancho de la página */
+            height: 2px;
+            /* Define el grosor de la línea */
+            background-color: black;
+            /* Color de la línea */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row-2">
+            <div class="col-6">
+                <p style="text-align: right;">Fecha: {{fecha}} <br></p>
+                <div class="horizontal"></div>
+                <div class="fila">
+                    <img class="elemento" style="height: 75px; text-align: left;"
+                        src="{% static 'index/img/logo.jpg' %}" alt="Logo empresa" width="30" height="3"> <br>
+                    <h2 class="elemento" style="text-align: right; ">Cotización #: {{num_ticket}} <br></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row-2">
+        <div class="fila">
+            <div class="elemento-info">
+                <div class="col-6">
+                    <!-- <h5> <b>{{empresa.nombre}} </b></h5> -->
+                    <b>RNC:</b> {{empresa.rnc}} <br>
+                    <b>Direccion:</b> {{empresa.domicilio}} <br>
+                    <b>Telefono: </b>{{empresa.telefono}}<br>
+                    <!-- Cliente: {{cliente}} <br> -->
+                    <br>
+                </div>
+            </div>
+            <div class="elemento-info">
+                <div class="col-6">
+                    <b>Cliente: </b>{{cliente.nombre}} </br>
+                    <b>RNC: </b> {{cliente.nif}}<br>
+                    <b>Codigo Cliente: </b>{{cliente.codigo }} <br>
+                    <b>Telefono:</b> {{cliente.telefono}}<br>
+                    <b>Correo:</b> {{cliente.apellido}}</br>
+                    <b>Dirección:</b> {{cliente.direccion}}</br>
+                    <!-- Cliente: {{cliente}} <br> -->
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:25%"> <b>Cant.</b></th>
+                        <td style="width:25%"> <b> Producto</b> </td>
+                        <td style="width:30%"> <b> Descripción</b> </td>
+                        {% if iva == "true" or iva == "True" %}
+                        <td style="width:10%"> <b> ITBIS</b> </td>
+                        {% endif %}
+                        <td style="width:10%"> <b>Subtotal</b> </td>
+                    </tr>
+                </thead>
+                <tbody class="text-dark">
+                    {% if iva == "false" or iva == "False" %}
+                    {% for i in items %}
+                    <tr>
+                        <td>{{i.cantidad}}</td>
+                        <td>{{i.producto.nombre}}</td>
+                        <td>{{i.producto.descripcion}}</td>
+                        <td>{{empresa.moneda}} {{i.total|intcomma}}</td>
+
+                    </tr>
+                    {% endfor %}
+                    {% elif iva == "true" or iva == "True" %}
+                    {% for i in items %}
+                    <tr>
+                        <td>{{i.cantidad}}</td>
+                        <td>{{i.producto.nombre}}</td>
+                        <td>{{i.producto.descripcion}}</td>
+                        <td>{{i.iva}}</td>
+                        <td>{{empresa.moneda}} {{i.subtotal|intcomma}}</td>
+
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            {% if iva == "true" or iva == "True" %}
+            <h5 style="text-align: right;"> <b> Subtotal: {{empresa.moneda}}
+                    {{subtotal|floatformat:"2"|intcomma}}</b></h5>
+            <h5 style="text-align: right;"> <b> ITBIS: {{empresa.moneda}} {{iva_suma|floatformat:"2"|intcomma}}</b>
+            </h5>
+            {% endif %}
+            <h5 style="text-align: right;"> <b> Total: {{empresa.moneda}} {{total|floatformat:"2"|intcomma}}</b>
+            </h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <b>Nota: </b>
+            <h5 style="text-align: left;">{{comentarios}}</h5>
+        </div>
+        <div class="col-12">
+            <p class="line" style="text-align: center;">GRACIAS POR SU PREFERENCIA</P>
+        </div>
+    </div>
+    </div>
+</body>
+
+</html>
+
+<!-- <html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" src="style.css" >
+    <title>Pedido de Venta</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row-2">
+            <div class="col-6">
+                <p style="text-align: right;">Fecha: {{fecha}} <br></p>
+                <img style="height: 75px;" src="{% static 'index/img/logo.jpg' %}" alt="Logo empresa" width="30" height="3"> <br>
+                <h2 >Cotización #: {{num_ticket}} <br></h2>
+            </div>
+        </div>
+        <div class="row-2">
+            <div class="col-6">
+                <h4> <b>{{empresa.nombre}} </b></h4>
+                {{empresa.rnc}} <br>
+                {{empresa.domicilio}} <br>
+                {{empresa.telefono}}<br>
+                Cliente: {{cliente}} <br>
+                <br>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:25%"> <b>Cant.</b></th>
+                            <td style="width:25%"> <b> Producto</b> </td>
+                            <td style="width:30%"> <b> Descripción</b> </td>
+                            {% if iva == "true" or iva == "True" %}
+                                <td style="width:10%"> <b> IVA</b> </td>
+                            {% endif %}
+                            <td style="width:10%"> <b>Subtotal</b>  </td>
+                        </tr>
+                    </thead>
+                    <tbody class="text-dark">
+                        {% if iva == "false" or iva == "False" %}
+                        {% for i in items %}
+                        <tr>
+                            <td>{{i.cantidad}}</td>
+                            <td>{{i.producto.nombre}}</td>
+                            <td>{{i.producto.descripcion}}</td>
+                            <td>{{empresa.moneda}} {{i.total|intcomma}}</td>
+
+                        </tr>
+                        {% endfor %}
+                        {% elif iva == "true" or iva == "True" %}
+                        {% for i in items %}
+                        <tr>
+                            <td>{{i.cantidad}}</td>
+                            <td>{{i.producto.nombre}}</td>
+                            <td>{{i.producto.descripcion}}</td>
+                            <td>{{i.iva}}</td>
+                            <td>{{empresa.moneda}} {{i.subtotal|intcomma}}</td>
+
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                {% if iva == "true" or iva == "True" %}
+                <h5 style="text-align: right;"> <b> Subtotal: {{empresa.moneda}} {{subtotal|floatformat:"2"|intcomma}}</b></h5>
+                <h5 style="text-align: right;"> <b> Iva: {{empresa.moneda}} {{iva_suma|floatformat:"2"|intcomma}}</b></h5>
+                {% endif %}
+                <h5 style="text-align: right;"> <b> Total: {{empresa.moneda}} {{total|floatformat:"2"|intcomma}}</b></h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <h4 style="text-align: left;">{{comentarios}}</h4>
+            </div>
+            <div class="col-12">
+                <p style="text-align: center;">GRACIAS POR SU PREFERENCIA</P>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html> -->
